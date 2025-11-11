@@ -1,0 +1,26 @@
+{
+  "name": "synth-carbon-copy",
+  "version": "1.0.0",
+  "description": "Photoshop action to generate simulated carbon copies from 'typed' documents",
+  "main": "src/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/brossi/synth-carbon-copy.git"
+  },
+  "keywords": [
+    "photoshop",
+    "action",
+    "uxp",
+    "carbon-copy",
+    "effect"
+  ],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/brossi/synth-carbon-copy/issues"
+  },
+  "homepage": "https://github.com/brossi/synth-carbon-copy#readme"
+}
