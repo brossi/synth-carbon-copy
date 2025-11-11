@@ -16,8 +16,6 @@ This specification defines a private UXP plugin for Photoshop 27.0 that transfor
 - Batch folder processing with persistent folder handles
 - RGB color mode only (v0.1)
 
-**Implementation Timeline:** ~3 weeks (M0-M6)
-
 ---
 
 ## 1. Core Objectives
@@ -394,20 +392,18 @@ Located in plugin root directory, editable by user between runs.
 
 ### Milestone Overview
 
-| Milestone | Description | Duration | v0.1 | v0.2 |
-|-----------|-------------|----------|------|------|
-| M0 | Scaffold: manifest, config, logging, PRNG, folder persistence | 2-3 days | ✓ | - |
-| M1 | Layer selection, duplication, scaffold creation, state management | 2-3 days | ✓ | - |
-| M2 | Core effects: blur, noise, opacity, gradient streaks | 3-4 days | ✓ | - |
-| M3 | Texture overlays, paper backgrounds | 2-3 days | ✓ | - |
-| M4 | Reverse bleed integration | 2-3 days | ✓ | - |
-| M5 | Export engine, batch processing | 3-4 days | ✓ | - |
-| M6 | Testing, validation, seed reproducibility | 2-3 days | ✓ | - |
-| M7 | Advanced effects: motion blur, edge fray | - | - | ✓ |
-| M8 | Paper tone, pressure zones | - | - | ✓ |
-| M9 | UXP panel UI (optional) | - | - | ✓ |
-
-**Total v0.1 Duration:** ~16-23 days (~3 weeks)
+| Milestone | Description | v0.1 | v0.2 |
+|-----------|-------------|------|------|
+| M0 | Scaffold: manifest, config, logging, PRNG, folder persistence | ✓ | - |
+| M1 | Layer selection, duplication, scaffold creation, state management | ✓ | - |
+| M2 | Core effects: blur, noise, opacity, gradient streaks | ✓ | - |
+| M3 | Texture overlays, paper backgrounds | ✓ | - |
+| M4 | Reverse bleed integration | ✓ | - |
+| M5 | Export engine, batch processing | ✓ | - |
+| M6 | Testing, validation, seed reproducibility | ✓ | - |
+| M7 | Advanced effects: motion blur, edge fray | - | ✓ |
+| M8 | Paper tone, pressure zones | - | ✓ |
+| M9 | UXP panel UI (optional) | - | ✓ |
 
 ### v0.1 Feature Set
 
@@ -1473,7 +1469,7 @@ async function exportPNG(doc, copyNum, filename, settings) {
 **Steps:**
 1. Open Incident_Report.psd
 2. Plugins → Carbon Copy Simulator → Run
-3. Wait ~30 seconds
+3. Process completes
 4. Review results: 3 copy groups + exports
 
 **Output:**
@@ -1537,8 +1533,8 @@ async function exportPNG(doc, copyNum, filename, settings) {
 
 **Batch processing slower than expected**
 - Cause: Large documents (>500MB) OR high DPI (>600)
-- Expected: 30-60s per document at 300 DPI
 - Optimization: Process at 300 DPI, upscale later if needed
+- Note: Performance varies based on document complexity and hardware
 
 ---
 
@@ -1597,14 +1593,14 @@ async function exportPNG(doc, copyNum, filename, settings) {
 
 ### Performance Expectations
 
-| Document Type | Resolution | Layers | Est. Time |
-|---------------|-----------|--------|-----------|
-| Simple (2-3 layers) | 300 DPI | 2-3 | 15-25s |
-| Medium (5-7 layers) | 300 DPI | 5-7 | 30-45s |
-| Complex (10+ layers) | 300 DPI | 10+ | 45-75s |
-| High-res (same complexity) | 600 DPI | 5-7 | 60-120s |
+| Document Type | Resolution | Layers | Relative Processing |
+|---------------|-----------|--------|-------------------|
+| Simple (2-3 layers) | 300 DPI | 2-3 | Fast |
+| Medium (5-7 layers) | 300 DPI | 5-7 | Moderate |
+| Complex (10+ layers) | 300 DPI | 10+ | Slower |
+| High-res (same complexity) | 600 DPI | 5-7 | Significantly slower |
 
-**Acceptable for v0.1:** 30-90 seconds per document
+**Note:** Processing time varies based on document complexity, layer count, resolution, and hardware capabilities.
 **Optimization deferred to v0.2:** Async yielding, proxy preview
 
 ### Critical Implementation Notes
@@ -1626,7 +1622,6 @@ async function exportPNG(doc, copyNum, filename, settings) {
 **Date:** 2025-01-15
 **Status:** Ready for Engineering Implementation
 **Target Platform:** Photoshop 27.0 UXP
-**Estimated Implementation:** ~3 weeks (M0-M6)
 
 ---
 

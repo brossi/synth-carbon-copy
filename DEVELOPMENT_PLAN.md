@@ -10,20 +10,19 @@
 
 ## Executive Summary
 
-This plan organizes the v0.1 implementation into two focused iterations spanning approximately 3 weeks. Each iteration delivers working, testable functionality while building toward the complete feature set.
+This plan organizes the v0.1 implementation into two focused iterations. Each iteration delivers working, testable functionality while building toward the complete feature set.
 
-**Iteration 1 (Week 1-1.5):** Foundation & Core Processing
-**Iteration 2 (Week 2-3):** Advanced Features & Export System
+**Iteration 1:** Foundation & Core Processing
+**Iteration 2:** Advanced Features & Export System
 
 ---
 
 ## Iteration 1: Foundation & Core Processing
-**Duration:** 7-10 days
 **Goal:** Establish plugin infrastructure and core carbon copy effects
 
 ### Milestones
 
-#### M0: Scaffold & Infrastructure (2-3 days)
+#### M0: Scaffold & Infrastructure
 **Priority:** Critical - Required for all subsequent work
 
 **Deliverables:**
@@ -70,7 +69,7 @@ presets/default.json             # Default preset
 
 ---
 
-#### M1: Layer Selection & Scaffold (2-3 days)
+#### M1: Layer Selection & Scaffold
 **Priority:** Critical - Core workflow foundation
 
 **Deliverables:**
@@ -132,7 +131,7 @@ Document Root
 
 ---
 
-#### M2: Core Effects Implementation (3-4 days)
+#### M2: Core Effects Implementation
 **Priority:** Critical - Essential carbon copy visual effects
 
 **Deliverables:**
@@ -238,12 +237,11 @@ core/effects.js                  # All effect implementations
 ---
 
 ## Iteration 2: Advanced Features & Export System
-**Duration:** 9-13 days
 **Goal:** Complete v0.1 feature set with export and batch processing
 
 ### Milestones
 
-#### M3: Texture System (2-3 days)
+#### M3: Texture System
 **Priority:** High - Enhances realism
 
 **Deliverables:**
@@ -321,7 +319,7 @@ at target document dimensions.
 
 ---
 
-#### M4: Reverse Bleed-Through (2-3 days)
+#### M4: Reverse Bleed-Through
 **Priority:** High - Distinctive carbon copy artifact
 
 **Deliverables:**
@@ -389,7 +387,7 @@ core/effects.js                  # createReverseBleed() function
 
 ---
 
-#### M5: Export Engine & Batch Processing (3-4 days)
+#### M5: Export Engine & Batch Processing
 **Priority:** Critical - Required for deliverable output
 
 **Deliverables:**
@@ -478,7 +476,7 @@ core/engine.js                   # Batch processing loop
 
 ---
 
-#### M6: Testing, Validation & Documentation (2-3 days)
+#### M6: Testing, Validation & Documentation
 **Priority:** Critical - Ensures quality and reliability
 
 **Deliverables:**
@@ -523,10 +521,10 @@ docs/TEST_PLAN.md                # Testing procedures and results
 - [ ] Test 17: Document hash variation
 
 **Performance Benchmarking:**
-- [ ] Simple document (2-3 layers, 300 DPI) - Target: <25s
-- [ ] Medium document (5-7 layers, 300 DPI) - Target: <45s
-- [ ] Complex document (10+ layers, 300 DPI) - Target: <75s
-- [ ] Batch processing (5 documents) - Record total time
+- [ ] Simple document (2-3 layers, 300 DPI)
+- [ ] Medium document (5-7 layers, 300 DPI)
+- [ ] Complex document (10+ layers, 300 DPI)
+- [ ] Batch processing (5 documents)
 
 **Documentation:**
 
@@ -547,10 +545,10 @@ docs/TEST_PLAN.md                # Testing procedures and results
 
 **Success Criteria:**
 - [ ] All 17 tests pass
-- [ ] Seed reproducibility verified (3+ runs with identical seed)
+- [ ] Seed reproducibility verified across multiple runs with identical seed
 - [ ] Document hash produces variation across files
 - [ ] Document hash produces identical results for same file
-- [ ] Performance meets targets for 300 DPI documents
+- [ ] Performance acceptable for 300 DPI documents
 - [ ] No crashes or data loss during testing
 - [ ] Documentation clear and complete
 
@@ -622,12 +620,12 @@ docs/TEST_PLAN.md                # Testing procedures and results
 4. **Scope Creep** (High Impact, Medium Probability)
    - Risk: Additional feature requests during development
    - Mitigation: Strict adherence to spec, v0.2 parking lot for enhancements
-   - Fallback: Timebox iterations, defer non-critical features
+   - Fallback: Defer non-critical features
 
-5. **Testing Time Underestimation** (Medium Impact, Medium Probability)
-   - Risk: 17 tests may require more than 2-3 days
+5. **Testing Coverage** (Medium Impact, Medium Probability)
+   - Risk: 17 comprehensive tests may uncover more issues than anticipated
    - Mitigation: Automate where possible, parallel test execution
-   - Fallback: Extend M6 by 1-2 days if needed
+   - Fallback: Prioritize critical tests, defer nice-to-have validation
 
 ### Risk Response Plan
 
@@ -636,16 +634,16 @@ docs/TEST_PLAN.md                # Testing procedures and results
 - Update textures/README.txt with gradient file requirements
 - Document limitation for gradient customization
 
-**If performance is unacceptable (>120s for medium docs):**
+**If performance is unacceptable for typical documents:**
 - Profile code to identify bottlenecks
 - Optimize filter application (batch operations where possible)
-- Document performance expectations clearly
+- Document performance expectations and limitations clearly
 - Defer async yielding optimization to v0.2
 
 **If testing reveals critical bugs:**
 - Pause development, fix critical bugs before proceeding
 - Re-run affected tests
-- Adjust timeline if needed (communicate early)
+- Communicate impact and any necessary scope adjustments
 
 ---
 
@@ -699,7 +697,7 @@ docs/TEST_PLAN.md                # Testing procedures and results
 - [ ] Code modular and testable
 
 **Performance:**
-- [ ] Simple document processes in <30s
+- [ ] Simple document processing completes successfully
 
 ### Iteration 2 Success Criteria
 
@@ -712,13 +710,13 @@ docs/TEST_PLAN.md                # Testing procedures and results
 - [ ] Reverse bleed effect visible and realistic
 
 **Quality:**
-- [ ] Seed reproducibility verified across 3+ runs
+- [ ] Seed reproducibility verified across multiple runs
 - [ ] Document hash produces variation across files
 - [ ] Comprehensive error handling for all edge cases
 - [ ] Complete user documentation
 
 **Performance:**
-- [ ] Medium document processes in <45s
+- [ ] Medium document processing completes successfully
 - [ ] Batch processing completes without memory issues
 
 ### Overall v0.1 Success Criteria
@@ -745,29 +743,24 @@ docs/TEST_PLAN.md                # Testing procedures and results
 
 ---
 
-## Timeline Summary
+## Milestone Dependencies
 
 ### Iteration 1: Foundation & Core Processing
-| Milestone | Duration | Dependencies | Deliverable |
-|-----------|----------|--------------|-------------|
-| M0: Scaffold | 2-3 days | None | Working plugin shell, config system, PRNG |
-| M1: Layers | 2-3 days | M0 | Layer filtering, scaffold, state management |
-| M2: Effects | 3-4 days | M0, M1 | Core effects, gradient streaks, paper BG |
-| **Total** | **7-10 days** | | **Working single-document processor** |
+| Milestone | Dependencies | Deliverable |
+|-----------|--------------|-------------|
+| M0: Scaffold | None | Working plugin shell, config system, PRNG |
+| M1: Layers | M0 | Layer filtering, scaffold, state management |
+| M2: Effects | M0, M1 | Core effects, gradient streaks, paper BG |
+| **Iteration 1 Complete** | **M0-M2** | **Working single-document processor** |
 
 ### Iteration 2: Advanced Features & Export
-| Milestone | Duration | Dependencies | Deliverable |
-|-----------|----------|--------------|-------------|
-| M3: Textures | 2-3 days | M0, M2 | Texture overlay system |
-| M4: Reverse Bleed | 2-3 days | M1, M2 | Reverse bleed effect |
-| M5: Export | 3-4 days | M0-M4 | Export engine, batch processing |
-| M6: Testing | 2-3 days | M0-M5 | Validated v0.1, documentation |
-| **Total** | **9-13 days** | | **Complete v0.1 release** |
-
-### Combined Timeline
-**Total Duration:** 16-23 days (~3-4 weeks)
-**Buffer:** 2-3 days for unexpected issues
-**Target Release:** Week 4 (end of Iteration 2)
+| Milestone | Dependencies | Deliverable |
+|-----------|--------------|-------------|
+| M3: Textures | M0, M2 | Texture overlay system |
+| M4: Reverse Bleed | M1, M2 | Reverse bleed effect |
+| M5: Export | M0-M4 | Export engine, batch processing |
+| M6: Testing | M0-M5 | Validated v0.1, documentation |
+| **Iteration 2 Complete** | **M0-M6** | **Complete v0.1 release** |
 
 ---
 
@@ -831,7 +824,7 @@ The following features are explicitly deferred to v0.2 and should NOT be impleme
 - [ ] README.md and USAGE.md complete
 - [ ] TEST_PLAN.md shows all tests passed
 - [ ] No critical or high-priority bugs
-- [ ] Performance meets targets for 300 DPI documents
+- [ ] Performance acceptable for 300 DPI documents
 - [ ] User can successfully run plugin following README alone
 
 ### v0.1 Release Ready When:
@@ -847,23 +840,23 @@ The following features are explicitly deferred to v0.2 and should NOT be impleme
 
 ## Next Steps (After Plan Approval)
 
-1. **Set up development environment** (M0 start)
+1. **Set up development environment**
    - Install/verify Photoshop 27.0 and UXP tools
    - Initialize plugin directory structure
    - Create manifest.json
 
-2. **Create sample assets** (M0 parallel)
+2. **Create sample assets**
    - Build simple_document.psd for testing
    - Build complex_document.psd for edge cases
    - Gather test batch of 3-5 PSDs
 
-3. **Begin M0 implementation** (Week 1, Day 1)
+3. **Begin M0 implementation**
    - Implement config.js with validation
    - Implement prng.js with mulberry32
    - Implement logger.js
    - Test PRNG reproducibility
 
-4. **Daily standups recommended**
+4. **Regular progress reviews recommended**
    - Progress check
    - Blocker identification
    - Risk assessment
