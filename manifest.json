@@ -1,8 +1,8 @@
 {
-  "id": "synth.carbon.copy",
-  "name": "Synth Carbon Copy",
-  "version": "1.0.0",
-  "main": "src/index.js",
+  "id": "com.benrossi.carboncopysimulator",
+  "name": "Carbon Copy Simulator",
+  "version": "0.1.0",
+  "main": "main.js",
   "manifestVersion": 5,
   "host": [
     {
@@ -10,80 +10,23 @@
       "minVersion": "27.0.0"
     }
   ],
+  "entrypoints": [
+    {
+      "type": "command",
+      "id": "runCarbonCopy",
+      "label": {
+        "default": "Run Carbon Copy Simulation"
+      }
+    }
+  ],
   "requiredPermissions": [
     {
-      "name": "webview",
-      "reason": "To display UI"
-    },
-    {
-      "name": "allowCodeGenerationFromStrings",
-      "reason": "To execute dynamic code"
-    },
-    {
       "name": "localFileSystem",
-      "reason": "To access local files"
+      "reason": "To access configuration files, presets, textures, and process batch folders"
     },
     {
       "name": "launchProcess",
-      "reason": "To launch external processes"
-    },
-    {
-      "name": "network",
-      "reason": "To access network resources"
-    }
-  ],
-  "entrypoints": [
-    {
-      "type": "panel",
-      "id": "synthCarbonCopyPanel",
-      "label": {
-        "default": "Carbon Copy"
-      },
-      "minimumSize": {
-        "width": 300,
-        "height": 400
-      },
-      "maximumSize": {
-        "width": 600,
-        "height": 800
-      },
-      "preferredDockedSize": {
-        "width": 350,
-        "height": 500
-      },
-      "preferredFloatingSize": {
-        "width": 350,
-        "height": 500
-      },
-      "icons": [
-        {
-          "width": 23,
-          "height": 23,
-          "path": "icons/icon-light.png",
-          "scale": [
-            1,
-            2
-          ],
-          "theme": [
-            "lightest",
-            "light",
-            "medium"
-          ]
-        },
-        {
-          "width": 23,
-          "height": 23,
-          "path": "icons/icon-dark.png",
-          "scale": [
-            1,
-            2
-          ],
-          "theme": [
-            "darkest",
-            "dark"
-          ]
-        }
-      ]
+      "reason": "To perform batch processing operations"
     }
   ]
 }

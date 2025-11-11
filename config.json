@@ -1,0 +1,78 @@
+{
+  "version": "1.0",
+
+  "mode": "single",
+
+  "batch": {
+    "promptForInputFolder": true,
+    "promptForOutputFolder": true,
+    "useLastFolders": true,
+    "includeSubfolders": false,
+    "filePattern": "*.psd",
+    "continueOnError": true,
+    "closeAfterProcessing": true
+  },
+
+  "preset": "presets/default.json",
+
+  "copyGeneration": {
+    "nCopies": 3,
+    "generateCopies": [1, 2, 3],
+    "randomSeed": 20251111,
+    "seedStrategy": "documentHash"
+  },
+
+  "layerRules": {
+    "processingMode": "smart_detection",
+    "processIfContains": ["body", "text", "typed", "content", "memo"],
+    "skipIfContains": ["signature", "sig", "stamp", "seal", "letterhead", "logo", "header", "form"],
+    "caseSensitive": false,
+    "visibleOnly": true
+  },
+
+  "workflow": {
+    "preserveOriginals": true,
+    "createScaffold": true,
+    "nonDestructive": true,
+    "trackLayerIDs": true,
+    "restoreStateOnError": true
+  },
+
+  "colorMode": {
+    "preferred": "RGB",
+    "convertIfNeeded": true,
+    "convertBack": false,
+    "warnOnConversion": true
+  },
+
+  "textures": {
+    "verifyResolution": true,
+    "verifyAspectRatio": true,
+    "scaling": "native",
+    "scalingPercentFuture": 100
+  },
+
+  "export": {
+    "enabled": true,
+    "formats": ["PNG", "PSD"],
+    "embedICC": true,
+    "logProfileName": true,
+    "appendCopyIndex": true,
+    "namingPattern": "{filename}_copy{n:02d}{suffix}.{ext}",
+    "suffix": "_carbon"
+  },
+
+  "logging": {
+    "enabled": true,
+    "logFile": "carbon_copy_log.txt",
+    "verbosity": "info",
+    "logFolder": "pluginData",
+    "maxLogSize": 1048576,
+    "includeTimings": false
+  },
+
+  "folderPersistence": {
+    "enabled": true,
+    "tokenFile": "folder_tokens.json"
+  }
+}
