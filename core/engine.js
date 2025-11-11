@@ -153,7 +153,7 @@ async function processDocument(doc, config, preset, folderPersistence) {
         const copyGroup = scaffold.copiesGroups[copyNum - 1];
 
         // Create paper background
-        await createPaperBackground(doc, copySettings, copyGroup, preset.textures);
+        await createPaperBackground(doc, copySettings, copyGroup, preset.textures, copyNum, config);
 
         // Process each target layer for this copy
         for (const origLayer of targetLayers) {

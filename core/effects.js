@@ -105,7 +105,7 @@ async function applyColorOverlay(layer, hexColor) {
               "color": {
                 "_obj": "RGBColor",
                 "red": r,
-                "grain": g,
+                "green": g,
                 "blue": b
               }
             }
@@ -214,7 +214,7 @@ async function createGradientStreak(doc, parentGroup, xPosition, angle, opacity,
                   "color": {
                     "_obj": "RGBColor",
                     "red": 64,
-                    "grain": 64,
+                    "green": 64,
                     "blue": 64
                   },
                   "location": 0,
@@ -225,7 +225,7 @@ async function createGradientStreak(doc, parentGroup, xPosition, angle, opacity,
                   "color": {
                     "_obj": "RGBColor",
                     "red": 64,
-                    "grain": 64,
+                    "green": 64,
                     "blue": 64
                   },
                   "location": 4096,
@@ -352,9 +352,201 @@ async function createImperfectionsLayer(doc, settings, copyNum, rng, targetGroup
 }
 
 /**
+ * Load texture file from disk
+ * Returns layer object or null if not found
+ */
+async function loadTexture(texturePath) {
+  const logger = getLogger();
+  const fs = require("uxp").storage.localFileSystem;
+
+  try {
+    const pluginFolder = await fs.getPluginFolder();
+    const textureFile = await pluginFolder.getEntry(texturePath);
+
+    if (!textureFile) {
+      await logger.warn(`Texture file not found: ${texturePath}`);
+      return null;
+    }
+
+    // Open texture as layer
+    return await executeAsModal(async () => {
+      try {
+        const doc = app.activeDocument;
+
+        // Place embedded (opens as smart object, then rasterize)
+        const placedLayer = await doc.createLayer();
+
+        // Use batchPlay to place file
+        await action.batchPlay([{
+          "_obj": "placeEvent",
+          "null": {
+            "_path": textureFile.nativePath,
+            "_kind": "local"
+          },
+          "freeTransformCenterState": {
+            "_enum": "quadCenterState",
+            "_value": "QCSAverage"
+          },
+          "linked": false
+        }], {
+          "synchronousExecution": true,
+          "modalBehavior": "execute"
+        });
+
+        const textureLayer = doc.activeLayers[0];
+
+        // Rasterize if smart object
+        if (textureLayer.kind !== "pixel") {
+          await action.batchPlay([{
+            "_obj": "rasterizeLayer",
+            "_target": [{ "_ref": "layer", "_enum": "ordinal", "_value": "targetEnum" }]
+          }], {
+            "synchronousExecution": true,
+            "modalBehavior": "execute"
+          });
+        }
+
+        return textureLayer;
+
+      } catch (err) {
+        await logger.error(`Failed to load texture ${texturePath}: ${err.message}`);
+        return null;
+      }
+    }, { commandName: "Load Texture" });
+
+  } catch (err) {
+    await logger.warn(`Texture file not found: ${texturePath} - ${err.message}`);
+    return null;
+  }
+}
+
+/**
+ * Verify texture properties (resolution, aspect ratio)
+ * Logs warnings if mismatches detected
+ */
+async function verifyTextureProperties(doc, textureLayer, config) {
+  const logger = getLogger();
+
+  if (!config.textures?.verifyResolution && !config.textures?.verifyAspectRatio) {
+    return; // Verification disabled
+  }
+
+  try {
+    // Check resolution (DPI)
+    if (config.textures?.verifyResolution) {
+      const docResolution = doc.resolution;
+      const texWidth = textureLayer.bounds.width;
+      const texHeight = textureLayer.bounds.height;
+
+      // Estimate texture DPI based on dimensions
+      // Standard letter size at 300 DPI = 2550×3300px
+      const estimatedDPI = (texWidth / 8.5 + texHeight / 11) / 2;
+      const dpiDifference = Math.abs(estimatedDPI - docResolution);
+
+      if (dpiDifference > 50) {
+        await logger.warn(
+          `Texture resolution differs from document. ` +
+          `Document: ${docResolution} DPI, Texture: ~${estimatedDPI.toFixed(0)} DPI`
+        );
+      }
+    }
+
+    // Check aspect ratio
+    if (config.textures?.verifyAspectRatio) {
+      const texWidth = textureLayer.bounds.width;
+      const texHeight = textureLayer.bounds.height;
+      const textureAspect = texWidth / texHeight;
+
+      const docWidth = doc.width.value;
+      const docHeight = doc.height.value;
+      const docAspect = docWidth / docHeight;
+
+      const aspectDifference = Math.abs(textureAspect - docAspect);
+
+      if (aspectDifference > 0.1) {
+        await logger.warn(
+          `Texture aspect ratio differs from document. ` +
+          `Document: ${docAspect.toFixed(2)}, Texture: ${textureAspect.toFixed(2)}`
+        );
+      }
+    }
+
+  } catch (err) {
+    await logger.debug(`Could not verify texture properties: ${err.message}`);
+  }
+}
+
+/**
+ * Apply texture overlay to target group
+ * Returns texture layer or null if texture not available
+ */
+async function applyTextureOverlay(doc, textureConfig, targetGroup, copyNum, config) {
+  const logger = getLogger();
+
+  if (!textureConfig || !textureConfig.path) {
+    return null; // No texture configured
+  }
+
+  // Check if texture should be applied to this copy
+  if (textureConfig.applyToLayers) {
+    const shouldApply = textureConfig.applyToLayers.includes("all") ||
+                       textureConfig.applyToLayers.includes("background") ||
+                       textureConfig.applyToLayers.includes(copyNum);
+
+    if (!shouldApply) {
+      await logger.debug(`Texture ${textureConfig.name} not applied to copy ${copyNum}`);
+      return null;
+    }
+  }
+
+  return await executeAsModal(async () => {
+    try {
+      // Load texture
+      const textureLayer = await loadTexture(textureConfig.path);
+
+      if (!textureLayer) {
+        await logger.warn(`Texture ${textureConfig.name} could not be loaded, continuing without texture`);
+        return null;
+      }
+
+      // Set layer name
+      textureLayer.name = textureConfig.name || "Texture Overlay";
+
+      // Verify properties (warnings only)
+      await verifyTextureProperties(doc, textureLayer, config);
+
+      // Set blend mode
+      const blendModeMap = {
+        "softLight": "softLight",
+        "overlay": "overlay",
+        "multiply": "multiply",
+        "screen": "screen",
+        "hardLight": "hardLight",
+        "normal": "normal"
+      };
+
+      textureLayer.blendMode = blendModeMap[textureConfig.blendMode] || "softLight";
+
+      // Set opacity
+      textureLayer.opacity = textureConfig.opacity || 30;
+
+      // Move to target group (above background, below text)
+      await textureLayer.move(targetGroup, "placeAtEnd");
+
+      await logger.info(`Applied texture overlay: ${textureConfig.name}`);
+      return textureLayer;
+
+    } catch (err) {
+      await logger.warn(`Failed to apply texture overlay: ${err.message}`);
+      return null;
+    }
+  }, { commandName: `Apply Texture Overlay` });
+}
+
+/**
  * Create paper background layer
  */
-async function createPaperBackground(doc, settings, targetGroup, textures) {
+async function createPaperBackground(doc, settings, targetGroup, textures, copyNum, config) {
   const logger = getLogger();
 
   return await executeAsModal(async () => {
@@ -376,7 +568,7 @@ async function createPaperBackground(doc, settings, targetGroup, textures) {
             "color": {
               "_obj": "RGBColor",
               "red": r,
-              "grain": g,
+              "green": g,
               "blue": b
             }
           }
@@ -393,6 +585,14 @@ async function createPaperBackground(doc, settings, targetGroup, textures) {
       await paperLayer.move(targetGroup, "placeAtEnd");
 
       await logger.debug(`Created paper background #${hexColor}`);
+
+      // Apply texture overlays if configured
+      if (textures && Array.isArray(textures) && textures.length > 0) {
+        for (const textureConfig of textures) {
+          await applyTextureOverlay(doc, textureConfig, targetGroup, copyNum, config);
+        }
+      }
+
       return paperLayer;
 
     } catch (err) {
@@ -516,5 +716,8 @@ module.exports = {
   createGradientStreak,
   createImperfectionsLayer,
   createPaperBackground,
-  createReverseBleed
+  createReverseBleed,
+  loadTexture,
+  verifyTextureProperties,
+  applyTextureOverlay
 };

@@ -201,13 +201,34 @@ async function getOutputFolder(config, folderPersistence) {
     return await folderPersistence.getOutputFolder(false);
   }
 
-  // Otherwise, use document folder
+  // Otherwise, try to use document folder
   const doc = app.activeDocument;
   if (!doc.path) {
-    throw new Error("Document must be saved before exporting");
+    // Document not saved - prompt user for output folder
+    await logger.warn("Document is not saved. Prompting user for output folder.");
+
+    try {
+      const outputFolder = await folderPersistence.getOutputFolder(true);
+      return outputFolder;
+    } catch (err) {
+      throw new Error(
+        "Document must be saved before exporting, or select an output folder when prompted. " +
+        "Save your document with File > Save, or enable batch.promptForOutputFolder in config."
+      );
+    }
   }
 
-  return await fs.getFolder(doc.path);
+  // Document is saved - use its parent folder
+  try {
+    const docFolder = await fs.getFolder(doc.path);
+    return docFolder;
+  } catch (err) {
+    await logger.error(`Could not access document folder: ${err.message}`);
+
+    // Fallback: prompt for folder
+    await logger.warn("Prompting user for output folder as fallback.");
+    return await folderPersistence.getOutputFolder(true);
+  }
 }
 
 module.exports = {
