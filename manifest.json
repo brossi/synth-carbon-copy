@@ -1,0 +1,89 @@
+{
+  "id": "synth.carbon.copy",
+  "name": "Synth Carbon Copy",
+  "version": "1.0.0",
+  "main": "src/index.js",
+  "manifestVersion": 5,
+  "host": [
+    {
+      "app": "PS",
+      "minVersion": "27.0.0"
+    }
+  ],
+  "requiredPermissions": [
+    {
+      "name": "webview",
+      "reason": "To display UI"
+    },
+    {
+      "name": "allowCodeGenerationFromStrings",
+      "reason": "To execute dynamic code"
+    },
+    {
+      "name": "localFileSystem",
+      "reason": "To access local files"
+    },
+    {
+      "name": "launchProcess",
+      "reason": "To launch external processes"
+    },
+    {
+      "name": "network",
+      "reason": "To access network resources"
+    }
+  ],
+  "entrypoints": [
+    {
+      "type": "panel",
+      "id": "synthCarbonCopyPanel",
+      "label": {
+        "default": "Carbon Copy"
+      },
+      "minimumSize": {
+        "width": 300,
+        "height": 400
+      },
+      "maximumSize": {
+        "width": 600,
+        "height": 800
+      },
+      "preferredDockedSize": {
+        "width": 350,
+        "height": 500
+      },
+      "preferredFloatingSize": {
+        "width": 350,
+        "height": 500
+      },
+      "icons": [
+        {
+          "width": 23,
+          "height": 23,
+          "path": "icons/icon-light.png",
+          "scale": [
+            1,
+            2
+          ],
+          "theme": [
+            "lightest",
+            "light",
+            "medium"
+          ]
+        },
+        {
+          "width": 23,
+          "height": 23,
+          "path": "icons/icon-dark.png",
+          "scale": [
+            1,
+            2
+          ],
+          "theme": [
+            "darkest",
+            "dark"
+          ]
+        }
+      ]
+    }
+  ]
+}
