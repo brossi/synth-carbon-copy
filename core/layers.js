@@ -324,19 +324,22 @@ async function createDefaultTextLayers(doc) {
     // Create text layers using Photoshop DOM API
     for (let i = 0; i < sampleTexts.length; i++) {
       const text = sampleTexts[i];
+      const yPosition = 100 + (i * 40); // Space lines vertically
 
-      // Create a new text layer
-      const textLayer = await doc.createTextLayer();
+      // Create a new text layer with options
+      const textLayer = await doc.createTextLayer({
+        contents: text || " ", // Empty lines get a space
+        fontSize: 14,
+        position: { x: 100, y: yPosition }
+      });
 
-      // Set properties
-      textLayer.name = `text_body_${i + 1}`;
-      textLayer.textItem.contents = text || " "; // Empty lines get a space
-
-      // Position the layer
-      // Note: Text layer positioning in UXP is done via the text bounds
-      // For simplicity, we'll just create them and let them stack
-
-      await logger.debug(`Created text layer: ${textLayer.name}`);
+      // Set layer name
+      if (textLayer) {
+        textLayer.name = `text_body_${i + 1}`;
+        await logger.debug(`Created text layer: ${textLayer.name}`);
+      } else {
+        await logger.warn(`Failed to create text layer ${i + 1}`);
+      }
     }
 
     await logger.info(`Created ${sampleTexts.length} default text layers`);
