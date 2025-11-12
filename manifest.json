@@ -19,14 +19,7 @@
       }
     }
   ],
-  "requiredPermissions": [
-    {
-      "name": "localFileSystem",
-      "reason": "To access configuration files, presets, textures, and process batch folders"
-    },
-    {
-      "name": "launchProcess",
-      "reason": "To perform batch processing operations"
-    }
-  ]
+  "requiredPermissions": {
+    "localFileSystem": "fullAccess"
+  }
 }
