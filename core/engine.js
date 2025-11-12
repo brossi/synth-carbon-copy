@@ -3,7 +3,7 @@
  * Orchestrates the carbon copy generation pipeline
  */
 
-const { app } = require("photoshop");
+const { app, constants } = require("photoshop");
 const { executeAsModal } = require("photoshop").core;
 const { getLogger } = require("./logger");
 const { createSeededRandom, calculateDocumentSeed } = require("./prng");
@@ -12,8 +12,6 @@ const {
   identifyExcludedLayers,
   createScaffold,
   moveLayersToGroup,
-  captureDocumentState,
-  restoreDocumentState,
   verifyOriginalLayerIDs,
   createDefaultTextLayers
 } = require("./layers");
@@ -41,11 +39,11 @@ async function validateDocument(doc, config) {
   }
 
   // Check color mode
-  if (doc.mode !== "RGBColorMode") {
+  if (doc.mode !== constants.DocumentMode.RGBColorMode) {
     if (config.colorMode?.convertIfNeeded) {
-      validation.warnings.push(`Document is in ${doc.mode} mode. Will convert to RGB (may be lossy).`);
+      validation.warnings.push(`Document is not in RGB mode. Will convert to RGB (may be lossy).`);
     } else {
-      validation.errors.push(`Document must be in RGB mode (currently ${doc.mode})`);
+      validation.errors.push(`Document must be in RGB mode`);
     }
   }
 
@@ -63,7 +61,7 @@ async function validateDocument(doc, config) {
 async function convertColorModeIfNeeded(doc, config) {
   const logger = getLogger();
 
-  if (doc.mode === "RGBColorMode") {
+  if (doc.mode === constants.DocumentMode.RGBColorMode) {
     return; // Already RGB
   }
 
@@ -72,10 +70,10 @@ async function convertColorModeIfNeeded(doc, config) {
   }
 
   return await executeAsModal(async () => {
-    await logger.warn(`Converting document from ${doc.mode} to RGB...`);
+    await logger.warn(`Converting document to RGB mode...`);
 
     try {
-      await doc.changeMode("RGBColorMode");
+      await doc.changeMode(constants.ChangeMode.RGBColorMode);
       await logger.info("Color mode converted to RGB");
     } catch (err) {
       await logger.error(`Failed to convert color mode: ${err.message}`);
@@ -91,9 +89,6 @@ async function processDocument(doc, config, preset, folderPersistence) {
   const logger = getLogger();
 
   await logger.info(`Processing document: ${doc.name}`);
-
-  // CRITICAL: Save state before any operations
-  const savedState = captureDocumentState(doc);
 
   try {
     return await executeAsModal(async () => {
@@ -231,12 +226,6 @@ async function processDocument(doc, config, preset, folderPersistence) {
   } catch (err) {
     await logger.error(`Processing failed: ${err.message}`);
     throw err;
-
-  } finally {
-    // CRITICAL: Restore state even on error
-    if (config.workflow?.restoreStateOnError) {
-      await restoreDocumentState(doc, savedState);
-    }
   }
 }
 

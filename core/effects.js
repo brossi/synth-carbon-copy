@@ -3,7 +3,7 @@
  * Core effects: blur, noise, opacity, gradient streaks, reverse bleed
  */
 
-const { app, action } = require("photoshop");
+const { app, action, constants } = require("photoshop");
 const { executeAsModal } = require("photoshop").core;
 const { getLogger } = require("./logger");
 
@@ -295,16 +295,16 @@ async function createImperfectionsLayer(doc, settings, copyNum, rng, targetGroup
         name: `Imperfections - Copy ${copyNum}`
       });
 
-      // Set blend mode - convert string to Photoshop enum
+      // Set blend mode - convert string to Photoshop constant
       const blendModeMap = {
-        "multiply": "multiply",
-        "screen": "screen",
-        "overlay": "overlay",
-        "softLight": "softLight",
-        "hardLight": "hardLight"
+        "multiply": constants.BlendMode.MULTIPLY,
+        "screen": constants.BlendMode.SCREEN,
+        "overlay": constants.BlendMode.OVERLAY,
+        "softLight": constants.BlendMode.SOFTLIGHT,
+        "hardLight": constants.BlendMode.HARDLIGHT
       };
 
-      imperfGroup.blendMode = blendModeMap[settings.blendMode] || "multiply";
+      imperfGroup.blendMode = blendModeMap[settings.blendMode] || constants.BlendMode.MULTIPLY;
       imperfGroup.opacity = settings.layerOpacity;
 
       // Generate random vertical streaks using gradient fills
@@ -517,15 +517,15 @@ async function applyTextureOverlay(doc, textureConfig, targetGroup, copyNum, con
 
       // Set blend mode
       const blendModeMap = {
-        "softLight": "softLight",
-        "overlay": "overlay",
-        "multiply": "multiply",
-        "screen": "screen",
-        "hardLight": "hardLight",
-        "normal": "normal"
+        "softLight": constants.BlendMode.SOFTLIGHT,
+        "overlay": constants.BlendMode.OVERLAY,
+        "multiply": constants.BlendMode.MULTIPLY,
+        "screen": constants.BlendMode.SCREEN,
+        "hardLight": constants.BlendMode.HARDLIGHT,
+        "normal": constants.BlendMode.NORMAL
       };
 
-      textureLayer.blendMode = blendModeMap[textureConfig.blendMode] || "softLight";
+      textureLayer.blendMode = blendModeMap[textureConfig.blendMode] || constants.BlendMode.SOFTLIGHT;
 
       // Set opacity
       textureLayer.opacity = textureConfig.opacity || 30;
