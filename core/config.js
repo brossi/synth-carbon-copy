@@ -4,7 +4,26 @@
  */
 
 const fs = require("uxp").storage.localFileSystem;
-const { getLogger } = require("./logger");
+
+/**
+ * Safe logger wrapper to prevent circular dependency issues
+ * Falls back to console if logger not yet initialized
+ */
+function safeLog(level, message) {
+  try {
+    const { getLogger } = require("./logger");
+    const logger = getLogger();
+    if (logger && typeof logger[level] === 'function') {
+      return logger[level](message);
+    }
+  } catch (err) {
+    // Logger not initialized yet, use console
+  }
+  // Fallback to console
+  if (typeof console[level] === 'function') {
+    console[level](message);
+  }
+}
 
 /**
  * Load configuration file
@@ -171,13 +190,11 @@ class FolderPersistence {
       try {
         const folder = await fs.getEntryForPersistentToken(tokens.inputFolder);
         if (folder) {
-          const logger = getLogger();
-          await logger.info("Rehydrated input folder from token");
+          await safeLog("info", "Rehydrated input folder from token");
           return folder;
         }
       } catch (err) {
-        const logger = getLogger();
-        await logger.warn("Failed to rehydrate input folder, will prompt user");
+        await safeLog("warn", "Failed to rehydrate input folder, will prompt user");
       }
     }
 
@@ -206,13 +223,11 @@ class FolderPersistence {
       try {
         const folder = await fs.getEntryForPersistentToken(tokens.outputFolder);
         if (folder) {
-          const logger = getLogger();
-          await logger.info("Rehydrated output folder from token");
+          await safeLog("info", "Rehydrated output folder from token");
           return folder;
         }
       } catch (err) {
-        const logger = getLogger();
-        await logger.warn("Failed to rehydrate output folder, will prompt user");
+        await safeLog("warn", "Failed to rehydrate output folder, will prompt user");
       }
     }
 
