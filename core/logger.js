@@ -29,10 +29,18 @@ class Logger {
   async getLogFile() {
     try {
       const dataFolder = await fs.getDataFolder();
-      const logFile = await dataFolder.createFile(this.logFile, { overwrite: false });
-      return logFile;
+
+      // Try to get existing file first
+      try {
+        const existingFile = await dataFolder.getEntry(this.logFile);
+        return existingFile;
+      } catch (err) {
+        // File doesn't exist, create it
+        const newFile = await dataFolder.createFile(this.logFile, { overwrite: false });
+        return newFile;
+      }
     } catch (err) {
-      console.error("Failed to create log file:", err);
+      console.error("Failed to get/create log file:", err);
       return null;
     }
   }
@@ -47,28 +55,34 @@ class Logger {
       return; // Message below current verbosity level
     }
 
+    const timestamp = new Date().toISOString();
+    const logEntry = `[${timestamp}] [${level.toUpperCase()}] ${message}\n`;
+
+    // Always log to console for development
+    console.log(logEntry.trim());
+
     try {
       const logFile = await this.getLogFile();
       if (!logFile) return;
 
-      const timestamp = new Date().toISOString();
-      const logEntry = `[${timestamp}] [${level.toUpperCase()}] ${message}\n`;
+      // Read current content
+      let currentContent = "";
+      try {
+        currentContent = await logFile.read();
+      } catch (err) {
+        // File is empty or newly created, start fresh
+        currentContent = "";
+      }
 
-      // Check file size
-      const entry = await logFile.read();
-      const currentSize = new Blob([entry]).size;
+      const currentSize = new Blob([currentContent]).size;
 
       if (currentSize > this.maxLogSize) {
         // Truncate log file if too large
         await logFile.write(logEntry);
       } else {
         // Append to log file
-        const currentContent = await logFile.read();
         await logFile.write(currentContent + logEntry);
       }
-
-      // Also log to console for development
-      console.log(logEntry.trim());
 
     } catch (err) {
       console.error("Failed to write to log:", err);
