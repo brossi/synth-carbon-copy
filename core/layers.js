@@ -301,7 +301,7 @@ async function verifyOriginalLayerIDs(doc, originalIDs) {
  */
 async function createDefaultTextLayers(doc) {
   const logger = getLogger();
-  const { action } = require("photoshop");
+  const { constants } = require("photoshop");
 
   await logger.info("Creating default text layers...");
 
@@ -321,59 +321,22 @@ async function createDefaultTextLayers(doc) {
   ];
 
   try {
-    // Create text layers using batchPlay
+    // Create text layers using Photoshop DOM API
     for (let i = 0; i < sampleTexts.length; i++) {
       const text = sampleTexts[i];
-      const yPosition = 100 + (i * 60); // Space lines vertically
 
-      await action.batchPlay([{
-        "_obj": "make",
-        "_target": [{ "_ref": "textLayer" }],
-        "using": {
-          "_obj": "textLayer",
-          "textKey": {
-            "_obj": "textKey",
-            "textClickPoint": {
-              "_obj": "paint",
-              "horizontal": { "_unit": "pixelsUnit", "_value": 100 },
-              "vertical": { "_unit": "pixelsUnit", "_value": yPosition }
-            },
-            "textShape": [{
-              "_obj": "textShape",
-              "bounds": {
-                "_obj": "rectangle",
-                "top": { "_unit": "pixelsUnit", "_value": yPosition },
-                "left": { "_unit": "pixelsUnit", "_value": 100 },
-                "bottom": { "_unit": "pixelsUnit", "_value": yPosition + 50 },
-                "right": { "_unit": "pixelsUnit", "_value": 700 }
-              }
-            }],
-            "textStyleRange": [{
-              "_obj": "textStyleRange",
-              "from": 0,
-              "to": text.length,
-              "textStyle": {
-                "_obj": "textStyle",
-                "fontName": "CourierNewPSMT",
-                "size": { "_unit": "pointsUnit", "_value": 14 },
-                "color": {
-                  "_obj": "RGBColor",
-                  "red": 0,
-                  "grain": 0,
-                  "blue": 0
-                }
-              }
-            }]
-          }
-        }
-      }], { synchronousExecution: true, modalBehavior: "execute" });
+      // Create a new text layer
+      const textLayer = await doc.createTextLayer();
 
-      // Set the text content and rename layer
-      const layer = doc.activeLayers[0];
-      if (layer && layer.kind === "text") {
-        layer.textItem.contents = text;
-        layer.name = `text_line_${i + 1}`;
-      }
+      // Set properties
+      textLayer.name = `text_body_${i + 1}`;
+      textLayer.textItem.contents = text || " "; // Empty lines get a space
+
+      // Position the layer
+      // Note: Text layer positioning in UXP is done via the text bounds
+      // For simplicity, we'll just create them and let them stack
+
+      await logger.debug(`Created text layer: ${textLayer.name}`);
     }
 
     await logger.info(`Created ${sampleTexts.length} default text layers`);
