@@ -296,6 +296,95 @@ async function verifyOriginalLayerIDs(doc, originalIDs) {
   }
 }
 
+/**
+ * Create default text layers if no processable layers exist
+ */
+async function createDefaultTextLayers(doc) {
+  const logger = getLogger();
+  const { action } = require("photoshop");
+
+  await logger.info("Creating default text layers...");
+
+  // Sample text content
+  const sampleTexts = [
+    "MEMORANDUM",
+    "TO: Department Staff",
+    "FROM: Administration",
+    "DATE: November 11, 2025",
+    "RE: Carbon Copy Simulation Demo",
+    "",
+    "This is a sample typed document created automatically by the Carbon Copy Simulator plugin.",
+    "The text layers will be processed to generate realistic carbon copy effects.",
+    "",
+    "Each copy will have varying degrees of blur, noise, and color shifts to simulate",
+    "the authentic appearance of vintage carbon paper duplicates."
+  ];
+
+  try {
+    // Create text layers using batchPlay
+    for (let i = 0; i < sampleTexts.length; i++) {
+      const text = sampleTexts[i];
+      const yPosition = 100 + (i * 60); // Space lines vertically
+
+      await action.batchPlay([{
+        "_obj": "make",
+        "_target": [{ "_ref": "textLayer" }],
+        "using": {
+          "_obj": "textLayer",
+          "textKey": {
+            "_obj": "textKey",
+            "textClickPoint": {
+              "_obj": "paint",
+              "horizontal": { "_unit": "pixelsUnit", "_value": 100 },
+              "vertical": { "_unit": "pixelsUnit", "_value": yPosition }
+            },
+            "textShape": [{
+              "_obj": "textShape",
+              "bounds": {
+                "_obj": "rectangle",
+                "top": { "_unit": "pixelsUnit", "_value": yPosition },
+                "left": { "_unit": "pixelsUnit", "_value": 100 },
+                "bottom": { "_unit": "pixelsUnit", "_value": yPosition + 50 },
+                "right": { "_unit": "pixelsUnit", "_value": 700 }
+              }
+            }],
+            "textStyleRange": [{
+              "_obj": "textStyleRange",
+              "from": 0,
+              "to": text.length,
+              "textStyle": {
+                "_obj": "textStyle",
+                "fontName": "CourierNewPSMT",
+                "size": { "_unit": "pointsUnit", "_value": 14 },
+                "color": {
+                  "_obj": "RGBColor",
+                  "red": 0,
+                  "grain": 0,
+                  "blue": 0
+                }
+              }
+            }]
+          }
+        }
+      }], { synchronousExecution: true, modalBehavior: "execute" });
+
+      // Set the text content and rename layer
+      const layer = doc.activeLayers[0];
+      if (layer && layer.kind === "text") {
+        layer.textItem.contents = text;
+        layer.name = `text_line_${i + 1}`;
+      }
+    }
+
+    await logger.info(`Created ${sampleTexts.length} default text layers`);
+    return true;
+
+  } catch (err) {
+    await logger.error(`Failed to create default text layers: ${err.message}`);
+    return false;
+  }
+}
+
 module.exports = {
   getAllLayers,
   isLayerEffectivelyVisible,
@@ -306,5 +395,6 @@ module.exports = {
   moveLayersToGroup,
   captureDocumentState,
   restoreDocumentState,
-  verifyOriginalLayerIDs
+  verifyOriginalLayerIDs,
+  createDefaultTextLayers
 };

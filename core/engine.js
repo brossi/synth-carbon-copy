@@ -14,7 +14,8 @@ const {
   moveLayersToGroup,
   captureDocumentState,
   restoreDocumentState,
-  verifyOriginalLayerIDs
+  verifyOriginalLayerIDs,
+  createDefaultTextLayers
 } = require("./layers");
 const {
   processLayerForCopy,
@@ -112,11 +113,24 @@ async function processDocument(doc, config, preset, folderPersistence) {
       await convertColorModeIfNeeded(doc, config);
 
       // 3. LAYER IDENTIFICATION (visible-only + name matching)
-      const targetLayers = await identifyTargetLayers(doc, config.layerRules);
+      let targetLayers = await identifyTargetLayers(doc, config.layerRules);
       const excludedLayers = await identifyExcludedLayers(doc, config.layerRules);
 
+      // If no matching layers found, create default text layers
       if (targetLayers.length === 0) {
-        throw new Error("No visible layers match processing rules");
+        await logger.info("No matching layers found. Creating default text content...");
+        const created = await createDefaultTextLayers(doc);
+
+        if (!created) {
+          throw new Error("Failed to create default text layers");
+        }
+
+        // Re-scan for target layers after creation
+        targetLayers = await identifyTargetLayers(doc, config.layerRules);
+
+        if (targetLayers.length === 0) {
+          throw new Error("No processable layers found even after creating defaults");
+        }
       }
 
       await logger.info(`Found ${targetLayers.length} layers to process`);
